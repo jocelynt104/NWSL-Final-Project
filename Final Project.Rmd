@@ -1,0 +1,471 @@
+---
+title: "Final Project"
+author: "Jocelyn Tanner"
+date: "11/17/2021"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r, warning=FALSE, message=FALSE}
+#load packages
+library(dplyr)
+library(ggplot2)
+library(readr)
+
+#import dataset
+nwsl <- read_csv("C:/Users/jocel/Desktop/School/Junior Year/Fall/Exploratory and Cloud-Based Data Analysis/Final Project/adv_player_stats.csv")
+View(nwsl)
+
+#filter data to keepers only
+keepers <- nwsl %>% filter(position== "Goalkeeper")
+```
+
+```{r}
+#filter to reasonable data
+keepers2 <- keepers %>% filter(shirt_number <100)
+
+ggplot(keepers2, aes(shirt_number))+
+  scale_x_continuous(minor_breaks = seq(0, 100, 5))+
+  geom_histogram(bins = 100)+
+  ggtitle("Distribution of Goalkeeper Jersey Numbers")
+```
+
+```{r}
+keepers$status <- as.factor(keepers$status)
+ggplot(keepers, aes(status, goals_conceded, fill = status))+
+  geom_boxplot()+
+  ggtitle("Boxplot of Goals Conceded for Home and Away Games")
+```
+
+```{r}
+#anova test on goals conceded home vs away
+summary(aov(goals_conceded ~ status, data = keepers))
+```
+
+
+```{r}
+ggplot(keepers, aes(saves, goals_conceded, color = ..n..))+
+  scale_y_continuous(minor_breaks = seq(0, 12, 1))+
+  scale_fill_distiller(palette = "Blues")+
+  geom_count()+
+  ggtitle("Density plot of Saves vs Goals Allowed")
+```
+
+```{r}
+ggplot(keepers, aes(match_name, mins_played, fill = team_id))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Total Minutes Played for Each Goalkeeper")
+```
+
+```{r}
+ggplot(keepers, aes(match_name, game_started, fill = team_id))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Total Games Started for Each Goalkeeper")
+```
+
+
+```{r}
+#filter to top 11 keepers
+topkeepers <- keepers %>% filter(match_name == "A. Bledsoe" | match_name == "A. Franch" | match_name == "A. Harris" | match_name == "A. Naeher" | match_name == "H. Kopmeyer" | match_name == "J. Campbell" | match_name == "K. Rowland" | match_name == "K. Sheridan" | match_name == "L. Williams" | match_name == "N. Barnhart" | match_name == "S. Labbe")
+```
+
+```{r}
+#sum up necessary columns
+#renamed columns to match original
+
+#goals conceded
+totalgoals <- aggregate(topkeepers$goals_conceded, by = list(topkeepers$match_name), FUN = sum)
+names(totalgoals)[names(totalgoals) == "x"] <- "goals_allowed"
+names(totalgoals)[names(totalgoals) == "Group.1"] <- "match_name"
+
+#minutes played
+totalmin <- aggregate(topkeepers$mins_played, by = list(topkeepers$match_name), FUN = sum)
+names(totalmin)[names(totalmin) == "x"] <- "min_played"
+names(totalmin)[names(totalmin) == "Group.1"] <- "match_name"
+
+#saves
+totalsaves <- aggregate(topkeepers$saves, by = list(topkeepers$match_name), FUN = sum)
+names(totalsaves)[names(totalsaves) == "x"] <- "saves"
+names(totalsaves)[names(totalsaves) == "Group.1"] <- "match_name"
+
+#penalty saves
+totalpenaltysaves <- aggregate(topkeepers$penalty_save, by = list(topkeepers$match_name), FUN = sum)
+names(totalpenaltysaves)[names(totalpenaltysaves) == "x"] <- "penalty_saves"
+names(totalpenaltysaves)[names(totalpenaltysaves) == "Group.1"] <- "match_name"
+
+#penalties faced
+totalpenaltyfaced <- aggregate(topkeepers$penalty_faced, by = list(topkeepers$match_name), FUN = sum)
+names(totalpenaltyfaced)[names(totalpenaltyfaced) == "x"] <- "penalty_faced"
+names(totalpenaltyfaced)[names(totalpenaltyfaced) == "Group.1"] <- "match_name"
+
+#goal kicks
+totalgks <- aggregate(topkeepers$goal_kicks, by = list(topkeepers$match_name), FUN = sum)
+names(totalgks)[names(totalgks) == "x"] <- "goal_kicks"
+names(totalgks)[names(totalgks) == "Group.1"] <- "match_name"
+
+#accurate goal kicks
+totalaccurategks <- aggregate(topkeepers$accurate_goal_kicks, by = list(topkeepers$match_name), FUN = sum)
+names(totalaccurategks)[names(totalaccurategks) == "x"] <- "accurate_goal_kicks"
+names(totalaccurategks)[names(totalaccurategks) == "Group.1"] <- "match_name"
+
+#passes
+totalpass <- aggregate(topkeepers$total_pass, by = list(topkeepers$match_name), FUN = sum)
+names(totalpass)[names(totalpass) == "x"] <- "passes"
+names(totalpass)[names(totalpass) == "Group.1"] <- "match_name"
+
+#accurate passes
+totalaccuratepass <- aggregate(topkeepers$accurate_pass, by = list(topkeepers$match_name), FUN = sum)
+names(totalaccuratepass)[names(totalaccuratepass) == "x"] <- "accurate_passes"
+names(totalaccuratepass)[names(totalaccuratepass) == "Group.1"] <- "match_name"
+
+#throws
+totalthrow <- aggregate(topkeepers$keeper_throws, by = list(topkeepers$match_name), FUN = sum)
+names(totalthrow)[names(totalthrow) == "x"] <- "throws"
+names(totalthrow)[names(totalthrow) == "Group.1"] <- "match_name"
+
+#accurate throws
+totalaccuratethrow <- aggregate(topkeepers$accurate_keeper_throws, by = list(topkeepers$match_name), FUN = sum)
+names(totalaccuratethrow)[names(totalaccuratethrow) == "x"] <- "accurate_throws"
+names(totalaccuratethrow)[names(totalaccuratethrow) == "Group.1"] <- "match_name"
+
+#accurate throws
+totalaccuratethrow <- aggregate(topkeepers$accurate_keeper_throws, by = list(topkeepers$match_name), FUN = sum)
+names(totalaccuratethrow)[names(totalaccuratethrow) == "x"] <- "accurate_throws"
+names(totalaccuratethrow)[names(totalaccuratethrow) == "Group.1"] <- "match_name"
+
+#errors leading to goal
+totalerrorstogoal <- aggregate(topkeepers$error_lead_to_goal, by = list(topkeepers$match_name), FUN = sum)
+names(totalerrorstogoal)[names(totalerrorstogoal) == "x"] <- "error_caused_goal"
+names(totalerrorstogoal)[names(totalerrorstogoal) == "Group.1"] <- "match_name"
+
+#errors leading to shot
+totalerrorstoshot <- aggregate(topkeepers$error_lead_to_shot, by = list(topkeepers$match_name), FUN = sum)
+names(totalerrorstoshot)[names(totalerrorstoshot) == "x"] <- "error_caused_shot"
+names(totalerrorstoshot)[names(totalerrorstoshot) == "Group.1"] <- "match_name"
+
+#diving catches
+totaldivecatch <- aggregate(topkeepers$dive_catch, by = list(topkeepers$match_name), FUN = sum)
+names(totaldivecatch)[names(totaldivecatch) == "x"] <- "dive_catch"
+names(totaldivecatch)[names(totaldivecatch) == "Group.1"] <- "match_name"
+
+#diving saves
+totaldivesave <- aggregate(topkeepers$diving_save, by = list(topkeepers$match_name), FUN = sum)
+names(totaldivesave)[names(totaldivesave) == "x"] <- "dive_saves"
+names(totaldivesave)[names(totaldivesave) == "Group.1"] <- "match_name"
+
+#clean sheets
+totalcleansheets <- aggregate(topkeepers$clean_sheet, by = list(topkeepers$match_name), FUN = sum)
+names(totalcleansheets)[names(totalcleansheets) == "x"] <- "clean_sheets"
+names(totalcleansheets)[names(totalcleansheets) == "Group.1"] <- "match_name"
+
+
+#merge above data frames to create total statistics data frame
+totals <- merge.data.frame(totalgoals, totalmin, by = intersect(names(totalgoals),names(totalmin)))
+totals <- merge.data.frame(totals, totalsaves, by = intersect(names(totals),names(totalsaves)))
+totals <- merge.data.frame(totals, totalpenaltysaves, by = intersect(names(totals),names(totalpenaltysaves)))
+totals <- merge.data.frame(totals, totalpenaltyfaced, by = intersect(names(totals),names(totalpenaltyfaced)))
+totals <- merge.data.frame(totals, totalgks, by = intersect(names(totals),names(totalgks)))
+totals <- merge.data.frame(totals, totalaccurategks, by = intersect(names(totals),names(totalaccurategks)))
+totals <- merge.data.frame(totals, totalpass, by = intersect(names(totals),names(totalpass)))
+totals <- merge.data.frame(totals, totalaccuratepass, by = intersect(names(totals),names(totalaccuratepass)))
+totals <- merge.data.frame(totals, totalthrow, by = intersect(names(totals),names(totalthrow)))
+totals <- merge.data.frame(totals, totalaccuratethrow, by = intersect(names(totals),names(totalaccuratethrow)))
+totals <- merge.data.frame(totals, totalerrorstogoal, by = intersect(names(totals),names(totalerrorstogoal)))
+totals <- merge.data.frame(totals, totalerrorstoshot, by = intersect(names(totals),names(totalerrorstoshot)))
+totals <- merge.data.frame(totals, totaldivecatch, by = intersect(names(totals),names(totaldivecatch)))
+totals <- merge.data.frame(totals, totaldivesave, by = intersect(names(totals),names(totaldivesave)))
+totals <- merge.data.frame(totals, totalcleansheets, by = intersect(names(totals),names(totalcleansheets)))
+```
+
+```{r}
+#calculate statistics and percentages based on new data frame
+totals$gaa <- totals$goals_allowed /(totals$min_played/90)
+totals$save_percent <- totals$saves / (totals$saves + totals$goals_allowed)
+totals$penalty_save_percent <- totals$penalty_saves / totals$penalty_faced
+totals$accurate_gk_percent <- totals$accurate_goal_kicks / totals$goal_kicks
+totals$accurate_throw_percent <- totals$accurate_throws / totals$throws
+totals$accurate_pass_percent <- totals$accurate_passes / totals$passes
+totals$dive_catch_percent <- totals$dive_catch / totals$dive_saves
+totals$errors_caused_goal_per_game <- totals$error_caused_goal / (totals$min_played/90)
+totals$errors_caused_shot_per_game <- totals$error_caused_shot / (totals$min_played/90)
+totals$errors_per_game <- (totals$error_caused_goal + totals$error_caused_shot) / (totals$min_played/90)
+totals$clean_sheets_per_game <- totals$clean_sheets / (totals$min_played/90)
+```
+
+```{r}
+#create empty column to calculate rank 
+totals$tallies <- 0
+#rank each categories best to worst
+#1=best 11= worst, low number is better
+```
+
+```{r}
+ggplot(totals, aes(match_name, gaa , fill = match_name))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Goals Against Average for Each Goalkeeper")
+```
+
+```{r}
+summary(aov(gaa ~ match_name, totals))
+```
+```{r}
+#rank each player in goals against average and add to tallies column
+totals$tallies[totals$match_name == "A. Bledsoe"] <- totals$tallies[totals$match_name == "A. Bledsoe"] + 6
+totals$tallies[totals$match_name == "A. Franch"] <- totals$tallies[totals$match_name == "A. Franch"] + 2
+totals$tallies[totals$match_name == "A. Harris"] <- totals$tallies[totals$match_name == "A. Harris"] + 9
+totals$tallies[totals$match_name == "A. Naeher"] <- totals$tallies[totals$match_name == "A. Naeher"] + 5
+totals$tallies[totals$match_name == "H. Kopmeyer"] <- totals$tallies[totals$match_name == "H. Kopmeyer"] + 10
+totals$tallies[totals$match_name == "J. Campbell"] <- totals$tallies[totals$match_name == "J. Campbell"] + 8
+totals$tallies[totals$match_name == "K. Rowland"] <- totals$tallies[totals$match_name == "K. Rowland"] + 1
+totals$tallies[totals$match_name == "K. Sheridan"] <- totals$tallies[totals$match_name == "K. Sheridan"] + 11
+totals$tallies[totals$match_name == "L. Williams"] <- totals$tallies[totals$match_name == "L. Williams"] + 7
+totals$tallies[totals$match_name == "N. Barnhart"] <- totals$tallies[totals$match_name == "N. Barnhart"] + 3
+totals$tallies[totals$match_name == "S. Labbe"] <- totals$tallies[totals$match_name == "S. Labbe"] + 4
+
+```
+
+
+```{r}
+ggplot(totals, aes(match_name, save_percent , fill = match_name))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Save Percentage for Each Goalkeeper")
+```
+
+```{r}
+#rank each player in save percentage and add to tallies column
+totals$tallies[totals$match_name == "A. Bledsoe"] <- totals$tallies[totals$match_name == "A. Bledsoe"] + 1
+totals$tallies[totals$match_name == "A. Franch"] <- totals$tallies[totals$match_name == "A. Franch"] + 2
+totals$tallies[totals$match_name == "A. Harris"] <- totals$tallies[totals$match_name == "A. Harris"] + 11
+totals$tallies[totals$match_name == "A. Naeher"] <- totals$tallies[totals$match_name == "A. Naeher"] + 8
+totals$tallies[totals$match_name == "H. Kopmeyer"] <- totals$tallies[totals$match_name == "H. Kopmeyer"] + 7
+totals$tallies[totals$match_name == "J. Campbell"] <- totals$tallies[totals$match_name == "J. Campbell"] + 10
+totals$tallies[totals$match_name == "K. Rowland"] <- totals$tallies[totals$match_name == "K. Rowland"] + 5
+totals$tallies[totals$match_name == "K. Sheridan"] <- totals$tallies[totals$match_name == "K. Sheridan"] + 9
+totals$tallies[totals$match_name == "L. Williams"] <- totals$tallies[totals$match_name == "L. Williams"] + 4
+totals$tallies[totals$match_name == "N. Barnhart"] <- totals$tallies[totals$match_name == "N. Barnhart"] + 3
+totals$tallies[totals$match_name == "S. Labbe"] <- totals$tallies[totals$match_name == "S. Labbe"] + 6
+```
+
+
+```{r}
+ggplot(totals, aes(match_name, accurate_gk_percent , fill = match_name))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Goal Kick Accuracy Percentage for Each Goalkeeper")
+```
+
+```{r}
+#rank each player in accurate goal kick percentage and add to tallies column
+totals$tallies[totals$match_name == "A. Bledsoe"] <- totals$tallies[totals$match_name == "A. Bledsoe"] + 6
+totals$tallies[totals$match_name == "A. Franch"] <- totals$tallies[totals$match_name == "A. Franch"] + 4
+totals$tallies[totals$match_name == "A. Harris"] <- totals$tallies[totals$match_name == "A. Harris"] + 7
+totals$tallies[totals$match_name == "A. Naeher"] <- totals$tallies[totals$match_name == "A. Naeher"] + 9
+totals$tallies[totals$match_name == "H. Kopmeyer"] <- totals$tallies[totals$match_name == "H. Kopmeyer"] + 5
+totals$tallies[totals$match_name == "J. Campbell"] <- totals$tallies[totals$match_name == "J. Campbell"] + 8
+totals$tallies[totals$match_name == "K. Rowland"] <- totals$tallies[totals$match_name == "K. Rowland"] + 3
+totals$tallies[totals$match_name == "K. Sheridan"] <- totals$tallies[totals$match_name == "K. Sheridan"] + 11
+totals$tallies[totals$match_name == "L. Williams"] <- totals$tallies[totals$match_name == "L. Williams"] + 1
+totals$tallies[totals$match_name == "N. Barnhart"] <- totals$tallies[totals$match_name == "N. Barnhart"] + 2
+totals$tallies[totals$match_name == "S. Labbe"] <- totals$tallies[totals$match_name == "S. Labbe"] + 10
+```
+
+
+```{r}
+ggplot(totals, aes(match_name, accurate_pass_percent , fill = match_name))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Pass Accuracy Percentage for Each Goalkeeper")
+```
+
+```{r}
+#rank each player in accurate pass percentage and add to tallies column
+totals$tallies[totals$match_name == "A. Bledsoe"] <- totals$tallies[totals$match_name == "A. Bledsoe"] + 3
+totals$tallies[totals$match_name == "A. Franch"] <- totals$tallies[totals$match_name == "A. Franch"] + 10
+totals$tallies[totals$match_name == "A. Harris"] <- totals$tallies[totals$match_name == "A. Harris"] + 5
+totals$tallies[totals$match_name == "A. Naeher"] <- totals$tallies[totals$match_name == "A. Naeher"] + 9
+totals$tallies[totals$match_name == "H. Kopmeyer"] <- totals$tallies[totals$match_name == "H. Kopmeyer"] + 4
+totals$tallies[totals$match_name == "J. Campbell"] <- totals$tallies[totals$match_name == "J. Campbell"] + 8
+totals$tallies[totals$match_name == "K. Rowland"] <- totals$tallies[totals$match_name == "K. Rowland"] + 6
+totals$tallies[totals$match_name == "K. Sheridan"] <- totals$tallies[totals$match_name == "K. Sheridan"] + 11
+totals$tallies[totals$match_name == "L. Williams"] <- totals$tallies[totals$match_name == "L. Williams"] + 1
+totals$tallies[totals$match_name == "N. Barnhart"] <- totals$tallies[totals$match_name == "N. Barnhart"] + 2 
+totals$tallies[totals$match_name == "S. Labbe"] <- totals$tallies[totals$match_name == "S. Labbe"] + 7
+```
+
+
+```{r}
+ggplot(totals, aes(match_name, accurate_throw_percent , fill = match_name))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Throw Accuracy Percentage for Each Goalkeeper")
+```
+
+```{r}
+#rank each player in accurate throw percentage and add to tallies column
+totals$tallies[totals$match_name == "A. Bledsoe"] <- totals$tallies[totals$match_name == "A. Bledsoe"] + 9
+totals$tallies[totals$match_name == "A. Franch"] <- totals$tallies[totals$match_name == "A. Franch"] + 8
+totals$tallies[totals$match_name == "A. Harris"] <- totals$tallies[totals$match_name == "A. Harris"] + 4
+totals$tallies[totals$match_name == "A. Naeher"] <- totals$tallies[totals$match_name == "A. Naeher"] + 11
+totals$tallies[totals$match_name == "H. Kopmeyer"] <- totals$tallies[totals$match_name == "H. Kopmeyer"] + 2
+totals$tallies[totals$match_name == "J. Campbell"] <- totals$tallies[totals$match_name == "J. Campbell"] + 1
+totals$tallies[totals$match_name == "K. Rowland"] <- totals$tallies[totals$match_name == "K. Rowland"] + 10
+totals$tallies[totals$match_name == "K. Sheridan"] <- totals$tallies[totals$match_name == "K. Sheridan"] + 7
+totals$tallies[totals$match_name == "L. Williams"] <- totals$tallies[totals$match_name == "L. Williams"] + 5
+totals$tallies[totals$match_name == "N. Barnhart"] <- totals$tallies[totals$match_name == "N. Barnhart"] + 3
+totals$tallies[totals$match_name == "S. Labbe"] <- totals$tallies[totals$match_name == "S. Labbe"] + 6
+```
+
+
+```{r}
+ggplot(totals, aes(match_name, dive_catch_percent , fill = match_name))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Diving Catch Percentage for Each Goalkeeper")
+```
+
+```{r}
+#rank each player in diving catch percentage and add to tallies column
+totals$tallies[totals$match_name == "A. Bledsoe"] <- totals$tallies[totals$match_name == "A. Bledsoe"] + 10
+totals$tallies[totals$match_name == "A. Franch"] <- totals$tallies[totals$match_name == "A. Franch"] + 1
+totals$tallies[totals$match_name == "A. Harris"] <- totals$tallies[totals$match_name == "A. Harris"] + 8
+totals$tallies[totals$match_name == "A. Naeher"] <- totals$tallies[totals$match_name == "A. Naeher"] + 9
+totals$tallies[totals$match_name == "H. Kopmeyer"] <- totals$tallies[totals$match_name == "H. Kopmeyer"] + 4
+totals$tallies[totals$match_name == "J. Campbell"] <- totals$tallies[totals$match_name == "J. Campbell"] + 11
+totals$tallies[totals$match_name == "K. Rowland"] <- totals$tallies[totals$match_name == "K. Rowland"] + 2
+totals$tallies[totals$match_name == "K. Sheridan"] <- totals$tallies[totals$match_name == "K. Sheridan"] + 6
+totals$tallies[totals$match_name == "L. Williams"] <- totals$tallies[totals$match_name == "L. Williams"] + 5
+totals$tallies[totals$match_name == "N. Barnhart"] <- totals$tallies[totals$match_name == "N. Barnhart"] + 3
+totals$tallies[totals$match_name == "S. Labbe"] <- totals$tallies[totals$match_name == "S. Labbe"] + 7
+```
+
+
+```{r}
+ggplot(totals, aes(match_name, errors_caused_goal_per_game , fill = match_name))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Errors Causing Goals for Each Goalkeeper")
+```
+
+```{r}
+#rank each player in errors leading to goals per game and add to tallies column
+totals$tallies[totals$match_name == "A. Bledsoe"] <- totals$tallies[totals$match_name == "A. Bledsoe"] + 6
+totals$tallies[totals$match_name == "A. Franch"] <- totals$tallies[totals$match_name == "A. Franch"] + 1
+totals$tallies[totals$match_name == "A. Harris"] <- totals$tallies[totals$match_name == "A. Harris"] + 4
+totals$tallies[totals$match_name == "A. Naeher"] <- totals$tallies[totals$match_name == "A. Naeher"] + 2
+totals$tallies[totals$match_name == "H. Kopmeyer"] <- totals$tallies[totals$match_name == "H. Kopmeyer"] + 10
+totals$tallies[totals$match_name == "J. Campbell"] <- totals$tallies[totals$match_name == "J. Campbell"] + 11
+totals$tallies[totals$match_name == "K. Rowland"] <- totals$tallies[totals$match_name == "K. Rowland"] + 9
+totals$tallies[totals$match_name == "K. Sheridan"] <- totals$tallies[totals$match_name == "K. Sheridan"] + 8
+totals$tallies[totals$match_name == "L. Williams"] <- totals$tallies[totals$match_name == "L. Williams"] + 5
+totals$tallies[totals$match_name == "N. Barnhart"] <- totals$tallies[totals$match_name == "N. Barnhart"] + 3
+totals$tallies[totals$match_name == "S. Labbe"] <- totals$tallies[totals$match_name == "S. Labbe"] + 7
+```
+
+```{r}
+ggplot(totals, aes(match_name, errors_caused_shot_per_game , fill = match_name))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Errors Causing Shots for Each Goalkeeper")
+```
+
+```{r}
+#rank each player in errors leading to shots per game and add to tallies column
+totals$tallies[totals$match_name == "A. Bledsoe"] <- totals$tallies[totals$match_name == "A. Bledsoe"] + 8
+totals$tallies[totals$match_name == "A. Franch"] <- totals$tallies[totals$match_name == "A. Franch"] + 5
+totals$tallies[totals$match_name == "A. Harris"] <- totals$tallies[totals$match_name == "A. Harris"] + 7
+totals$tallies[totals$match_name == "A. Naeher"] <- totals$tallies[totals$match_name == "A. Naeher"] + 3
+totals$tallies[totals$match_name == "H. Kopmeyer"] <- totals$tallies[totals$match_name == "H. Kopmeyer"] + 1.5
+totals$tallies[totals$match_name == "J. Campbell"] <- totals$tallies[totals$match_name == "J. Campbell"] + 5
+totals$tallies[totals$match_name == "K. Rowland"] <- totals$tallies[totals$match_name == "K. Rowland"] + 11
+totals$tallies[totals$match_name == "K. Sheridan"] <- totals$tallies[totals$match_name == "K. Sheridan"] + 5
+totals$tallies[totals$match_name == "L. Williams"] <- totals$tallies[totals$match_name == "L. Williams"] + 10
+totals$tallies[totals$match_name == "N. Barnhart"] <- totals$tallies[totals$match_name == "N. Barnhart"] + 1.5
+totals$tallies[totals$match_name == "S. Labbe"] <- totals$tallies[totals$match_name == "S. Labbe"] + 9
+```
+
+
+```{r}
+ggplot(totals, aes(match_name, errors_per_game , fill = match_name))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Errors per Game for Each Goalkeeper")
+```
+
+```{r}
+ggplot(totals, aes(match_name, clean_sheets_per_game , fill = match_name))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Clean Sheets per Game for Each Goalkeeper")
+```
+```{r}
+#rank each player in clean sheets per game and add to tallies column
+totals$tallies[totals$match_name == "A. Bledsoe"] <- totals$tallies[totals$match_name == "A. Bledsoe"] + 7
+totals$tallies[totals$match_name == "A. Franch"] <- totals$tallies[totals$match_name == "A. Franch"] + 3
+totals$tallies[totals$match_name == "A. Harris"] <- totals$tallies[totals$match_name == "A. Harris"] + 9
+totals$tallies[totals$match_name == "A. Naeher"] <- totals$tallies[totals$match_name == "A. Naeher"] + 4
+totals$tallies[totals$match_name == "H. Kopmeyer"] <- totals$tallies[totals$match_name == "H. Kopmeyer"] + 10
+totals$tallies[totals$match_name == "J. Campbell"] <- totals$tallies[totals$match_name == "J. Campbell"] + 8
+totals$tallies[totals$match_name == "K. Rowland"] <- totals$tallies[totals$match_name == "K. Rowland"] + 1
+totals$tallies[totals$match_name == "K. Sheridan"] <- totals$tallies[totals$match_name == "K. Sheridan"] + 11
+totals$tallies[totals$match_name == "L. Williams"] <- totals$tallies[totals$match_name == "L. Williams"] + 6
+totals$tallies[totals$match_name == "N. Barnhart"] <- totals$tallies[totals$match_name == "N. Barnhart"] + 5
+totals$tallies[totals$match_name == "S. Labbe"] <- totals$tallies[totals$match_name == "S. Labbe"] + 2
+```
+
+
+```{r}
+ggplot(totals, aes(match_name, penalty_save_percent , fill = match_name))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  ggtitle("Penlty Save Percentage for Each Goalkeeper")
+```
+
+```{r}
+#rank each player in penalty save percentage and add to tallies column
+totals$tallies[totals$match_name == "A. Bledsoe"] <- totals$tallies[totals$match_name == "A. Bledsoe"] + 3
+totals$tallies[totals$match_name == "A. Franch"] <- totals$tallies[totals$match_name == "A. Franch"] + 5
+totals$tallies[totals$match_name == "A. Harris"] <- totals$tallies[totals$match_name == "A. Harris"] + 8
+totals$tallies[totals$match_name == "A. Naeher"] <- totals$tallies[totals$match_name == "A. Naeher"] + 9.5
+totals$tallies[totals$match_name == "H. Kopmeyer"] <- totals$tallies[totals$match_name == "H. Kopmeyer"] + 9.5
+totals$tallies[totals$match_name == "J. Campbell"] <- totals$tallies[totals$match_name == "J. Campbell"] + 2
+totals$tallies[totals$match_name == "K. Rowland"] <- totals$tallies[totals$match_name == "K. Rowland"] + 1
+totals$tallies[totals$match_name == "K. Sheridan"] <- totals$tallies[totals$match_name == "K. Sheridan"] + 4
+totals$tallies[totals$match_name == "L. Williams"] <- totals$tallies[totals$match_name == "L. Williams"] + 6
+totals$tallies[totals$match_name == "N. Barnhart"] <- totals$tallies[totals$match_name == "N. Barnhart"] + 7
+totals$tallies[totals$match_name == "S. Labbe"] <- totals$tallies[totals$match_name == "S. Labbe"] + 11
+```
+
+
+```{r}
+#create rank column to display results
+#attach rank to each player based on tallies column
+#lowest is best, highest is worst
+totals$rank[totals$match_name == "A. Bledsoe"] <- 5
+totals$rank[totals$match_name == "A. Franch"] <- 2
+totals$rank[totals$match_name == "A. Harris"] <- 9.5
+totals$rank[totals$match_name == "A. Naeher"] <- 8
+totals$rank[totals$match_name == "H. Kopmeyer"] <- 6
+totals$rank[totals$match_name == "J. Campbell"] <- 9.5
+totals$rank[totals$match_name == "K. Rowland"] <- 3
+totals$rank[totals$match_name == "K. Sheridan"] <- 11
+totals$rank[totals$match_name == "L. Williams"] <- 4 
+totals$rank[totals$match_name == "N. Barnhart"] <- 1
+totals$rank[totals$match_name == "S. Labbe"] <- 7
+```
+
+```{r}
+ggplot(totals, aes(match_name, rank , fill = match_name))+
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  scale_y_continuous(minor_breaks = seq(0, 11, 1))+
+  ggtitle("Ranking Results")
+```
+
+
+
+
